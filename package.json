@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "keywords": [],
-  "main": "src/index.tsx",
+  "main": "src/index.js",
   "dependencies": {
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-scripts": "5.0.1",
-    "axios":""
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "@types/react": "18.2.38",
