@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ImagineX - Professional AI Text-to-Image generation powered by Hugging Face Stable Diffusion models." />
+  <meta name="theme-color" content="#0f172a" />
+  <title>ImagineX - AI Text to Image</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="App" id="app">
+
+    <!-- HEADER -->
+    <header>
+      <div class="logo-container">
+        <div class="logo-icon"></div>
+        <h1>ImagineX</h1>
+      </div>
+      <p class="subtitle">Professional-grade AI generation at your fingertips.</p>
+    </header>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <button id="settings-toggle-btn" class="toolbar-btn" title="Settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        Settings
+      </button>
+    </div>
+
+    <!-- MAIN -->
+    <main class="main-container">
+
+      <!-- INPUT SECTION -->
+      <div class="input-section">
+
+        <!-- API KEY CONFIG (hidden by default if token exists) -->
+        <div id="api-key-config" class="api-key-config animate-slide-down" style="display:none;">
+          <h3>Hugging Face Configuration</h3>
+          <div class="input-wrapper">
+            <input
+              id="api-key-input"
+              type="password"
+              placeholder="hf_..."
+            />
+          </div>
+          <p class="helper-text">
+            Your token is stored locally for session persistence.
+            <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer">Get one here.</a>
+          </p>
+        </div>
+
+        <!-- MODEL SELECTION -->
+        <div class="model-selection animate-fade-in">
+          <label>Select AI Model</label>
+          <div class="model-grid" id="model-grid"></div>
+        </div>
+
+        <!-- PROMPT FORM -->
+        <form id="prompt-form" class="prompt-form">
+          <div class="input-group">
+            <label for="prompt">Enter Visionary Prompt</label>
+            <textarea
+              id="prompt"
+              placeholder="A digital painting of a cosmic lighthouse at the edge of the universe, vibrant colors, cinematic lighting, 8k..."
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit" id="generate-btn" class="generate-btn" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            </svg>
+            Generate Masterpiece
+          </button>
+        </form>
+
+        <!-- ERROR BADGE -->
+        <div id="error-badge" class="error-badge animate-shake" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span id="error-text"></span>
+        </div>
+
+      </div><!-- /input-section -->
+
+      <!-- OUTPUT SECTION -->
+      <div class="output-section" id="output-section">
+
+        <!-- Placeholder -->
+        <div id="placeholder" class="placeholder-text animate-fade-in">
+          <div class="placeholder-orb"></div>
+          <h3>Ready to Imagine</h3>
+          <p>Type your prompt and witness the power of Stable Diffusion.</p>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading-state" class="loading-state" style="display:none;">
+          <div class="processing-indicator"></div>
+          <p>Dreaming of your masterpiece...</p>
+          <div class="status-progress">
+            <div class="status-line"></div>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="result-container" class="result-container animate-scale-up" style="display:none;">
+          <div class="image-wrapper">
+            <img id="result-image" src="" alt="" class="result-image" />
+            <div class="image-meta">
+              <span id="result-model-name"></span>
+            </div>
+          </div>
+          <div class="image-actions">
+            <button id="download-btn" class="action-btn download-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Save Image
+            </button>
+            <button id="new-prompt-btn" class="action-btn">New Prompt</button>
+          </div>
+        </div>
+
+      </div><!-- /output-section -->
+
+    </main>
+
+    <!-- HISTORY SECTION -->
+    <section id="history-section" class="history-section animate-slide-up" style="display:none;">
+      <div class="history-header">
+        <h2>Recent Creations</h2>
+        <button id="clear-history-btn" class="clear-history">Clear All</button>
+      </div>
+      <div class="history-grid" id="history-grid"></div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>&copy; 2026 ImagineX AI. Integrated with Hugging Face Inference Infrastructure.</p>
+    </footer>
+
+  </div><!-- /App -->
+
+  <script>
+    // ─── CONFIG ─────────────────────────────────────────────────────────────────
+    const MODELS = [
+      { id: "runwayml/stable-diffusion-v1-5",            name: "Stable Diffusion v1.5", type: "General"       },
+      { id: "stabilityai/stable-diffusion-2-1",          name: "Stable Diffusion v2.1", type: "High Res"      },
+      { id: "prompthero/openjourney",                    name: "OpenJourney",           type: "Artistic"      },
+      { id: "SG161222/Realistic_Vision_V5.1_noVAE",      name: "Realistic Vision",      type: "Photorealistic"},
+      { id: "dreamlike-art/dreamlike-diffusion-1.0",     name: "Dreamlike",             type: "Fantasy"       },
+    ];
+
+    const BASE_MODEL_URL = "https://api-inference.huggingface.co/models/";
+
+    // ─── STATE ───────────────────────────────────────────────────────────────────
+    let selectedModel = MODELS[0].id;
+    let currentImageUrl = null;
+    let currentPrompt  = "";
+    let history = [];
+    let apiKey  = "";
+    let showSettings = false;
+
+    // ─── DOM REFS ────────────────────────────────────────────────────────────────
+    const settingsToggleBtn = document.getElementById("settings-toggle-btn");
+    const apiKeyConfig      = document.getElementById("api-key-config");
+    const apiKeyInput       = document.getElementById("api-key-input");
+    const modelGrid         = document.getElementById("model-grid");
+    const promptForm        = document.getElementById("prompt-form");
+    const promptTextarea    = document.getElementById("prompt");
+    const generateBtn       = document.getElementById("generate-btn");
+    const errorBadge        = document.getElementById("error-badge");
+    const errorText         = document.getElementById("error-text");
+    const placeholder       = document.getElementById("placeholder");
+    const loadingState      = document.getElementById("loading-state");
+    const resultContainer   = document.getElementById("result-container");
+    const resultImage       = document.getElementById("result-image");
+    const resultModelName   = document.getElementById("result-model-name");
+    const downloadBtn       = document.getElementById("download-btn");
+    const newPromptBtn      = document.getElementById("new-prompt-btn");
+    const historySection    = document.getElementById("history-section");
+    const historyGrid       = document.getElementById("history-grid");
+    const clearHistoryBtn   = document.getElementById("clear-history-btn");
+
+    // ─── INIT ────────────────────────────────────────────────────────────────────
+    function init() {
+      // load persisted data
+      apiKey  = localStorage.getItem("hf_api_token") || "";
+      history = JSON.parse(localStorage.getItem("imaginex_history") || "[]");
+
+      // show settings panel if no token
+      showSettings = !apiKey;
+      apiKeyInput.value = apiKey;
+      applySettingsVisibility();
+
+      // build model cards
+      renderModelGrid();
+
+      // render history
+      renderHistory();
+
+      // enable/disable generate button based on textarea
+      syncGenerateBtn();
+    }
+
+    // ─── SETTINGS TOGGLE ────────────────────────────────────────────────────────
+    settingsToggleBtn.addEventListener("click", () => {
+      showSettings = !showSettings;
+      applySettingsVisibility();
+    });
+
+    function applySettingsVisibility() {
+      if (showSettings) {
+        apiKeyConfig.style.display = "block";
+        settingsToggleBtn.classList.add("active");
+      } else {
+        apiKeyConfig.style.display = "none";
+        settingsToggleBtn.classList.remove("active");
+      }
+    }
+
+    // persist API key as user types
+    apiKeyInput.addEventListener("input", () => {
+      apiKey = apiKeyInput.value.trim();
+      if (apiKey) localStorage.setItem("hf_api_token", apiKey);
+      syncGenerateBtn();
+    });
+
+    // ─── MODEL GRID ──────────────────────────────────────────────────────────────
+    function renderModelGrid() {
+      modelGrid.innerHTML = "";
+      MODELS.forEach(model => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "model-card" + (model.id === selectedModel ? " active" : "");
+        btn.innerHTML = `<span class="model-name">${model.name}</span><span class="model-type">${model.type}</span>`;
+        btn.addEventListener("click", () => {
+          selectedModel = model.id;
+          renderModelGrid();
+        });
+        modelGrid.appendChild(btn);
+      });
+    }
+
+    // ─── PROMPT TEXTAREA ────────────────────────────────────────────────────────
+    promptTextarea.addEventListener("input", () => {
+      currentPrompt = promptTextarea.value.trim();
+      syncGenerateBtn();
+    });
+
+    function syncGenerateBtn() {
+      const hasPrompt = promptTextarea.value.trim().length > 0;
+      generateBtn.disabled = !hasPrompt;
+    }
+
+    // ─── GENERATE ────────────────────────────────────────────────────────────────
+    promptForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      currentPrompt = promptTextarea.value.trim();
+
+      if (!currentPrompt) return;
+
+      if (!apiKey) {
+        showError("Please provide a Hugging Face API Token in settings.");
+        showSettings = true;
+        applySettingsVisibility();
+        return;
+      }
+
+      setLoading(true);
+      hideError();
+      showPlaceholder(false);
+      showResult(false);
+
+      try {
+        const response = await fetch(`${BASE_MODEL_URL}${selectedModel}`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ inputs: currentPrompt }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) throw new Error("401");
+          if (response.status === 503) throw new Error("503");
+          throw new Error("generic");
+        }
+
+        const blob    = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        currentImageUrl = imageUrl;
+
+        // show result
+        const modelName = MODELS.find(m => m.id === selectedModel)?.name || "Unknown";
+        resultImage.src       = imageUrl;
+        resultImage.alt       = currentPrompt;
+        resultModelName.textContent = modelName;
+        showResult(true);
+
+        // save to history
+        const newItem = {
+          id:        Date.now(),
+          url:       imageUrl,
+          prompt:    currentPrompt,
+          model:     modelName,
+          timestamp: new Date().toLocaleTimeString(),
+        };
+        history = [newItem, ...history].slice(0, 10);
+        localStorage.setItem("imaginex_history", JSON.stringify(history));
+        renderHistory();
+
+      } catch (err) {
+        const msg = err.message === "401"
+          ? "Invalid API Token. Please check your token and try again."
+          : err.message === "503"
+          ? "Model is loading. Please try again in 5–10 seconds."
+          : "An error occurred while generating the image.";
+        showError(msg);
+        showPlaceholder(true);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // ─── DOWNLOAD ────────────────────────────────────────────────────────────────
+    downloadBtn.addEventListener("click", () => {
+      if (!currentImageUrl) return;
+      const link      = document.createElement("a");
+      link.href       = currentImageUrl;
+      link.download   = `imaginex-${currentPrompt.substring(0, 20).replace(/\s+/g, "-")}-${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // ─── NEW PROMPT ──────────────────────────────────────────────────────────────
+    newPromptBtn.addEventListener("click", () => {
+      showResult(false);
+      showPlaceholder(true);
+      currentImageUrl = null;
+    });
+
+    // ─── CLEAR HISTORY ───────────────────────────────────────────────────────────
+    clearHistoryBtn.addEventListener("click", () => {
+      if (window.confirm("Are you sure you want to clear your generation history?")) {
+        history = [];
+        localStorage.removeItem("imaginex_history");
+        renderHistory();
+      }
+    });
+
+    // ─── RENDER HISTORY ──────────────────────────────────────────────────────────
+    function renderHistory() {
+      if (history.length === 0) {
+        historySection.style.display = "none";
+        return;
+      }
+      historySection.style.display = "block";
+      historyGrid.innerHTML = "";
+      history.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "history-card";
+        card.innerHTML = `
+          <img src="${item.url}" alt="${item.prompt}" />
+          <div class="history-info">
+            <p class="history-prompt">${item.prompt}</p>
+            <p class="history-model">${item.model}</p>
+          </div>`;
+        card.addEventListener("click", () => {
+          currentImageUrl = item.url;
+          currentPrompt   = item.prompt;
+          promptTextarea.value    = item.prompt;
+          resultImage.src         = item.url;
+          resultImage.alt         = item.prompt;
+          resultModelName.textContent = item.model;
+          syncGenerateBtn();
+          hideError();
+          showPlaceholder(false);
+          setLoading(false);
+          showResult(true);
+        });
+        historyGrid.appendChild(card);
+      });
+    }
+
+    // ─── UI HELPERS ──────────────────────────────────────────────────────────────
+    function setLoading(isLoading) {
+      loadingState.style.display  = isLoading ? "flex" : "none";
+      generateBtn.disabled        = isLoading || !promptTextarea.value.trim();
+
+      // swap button content
+      generateBtn.innerHTML = isLoading
+        ? `<div class="loading-spinner-inline"></div>`
+        : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>Generate Masterpiece`;
+    }
+
+    function showPlaceholder(visible) {
+      placeholder.style.display = visible ? "flex" : "none";
+    }
+
+    function showResult(visible) {
+      resultContainer.style.display = visible ? "block" : "none";
+    }
+
+    function showError(msg) {
+      errorText.textContent    = msg;
+      errorBadge.style.display = "flex";
+      // re-trigger shake animation
+      errorBadge.classList.remove("animate-shake");
+      void errorBadge.offsetWidth;
+      errorBadge.classList.add("animate-shake");
+    }
+
+    function hideError() {
+      errorBadge.style.display = "none";
+    }
+
+    // ─── BOOT ────────────────────────────────────────────────────────────────────
+    init();
+  </script>
+
+</body>
+</html>
