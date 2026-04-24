@@ -433,7 +433,6 @@
 <body>
 <div class="shell">
 
-  <!-- HEADER -->
   <header class="header">
     <div class="brand">
       <div class="brand-dot"></div>
@@ -442,35 +441,15 @@
         <div class="brand-tagline">AI Text-to-Image</div>
       </div>
     </div>
-    <button id="settings-btn" class="settings-btn">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-      </svg>
-      Settings
-    </button>
   </header>
 
-  <!-- MAIN GRID -->
   <div class="grid">
-
-    <!-- LEFT PANEL -->
     <div class="panel">
-
-      <!-- API Config (hidden by default if token found) -->
-      <div id="api-config" class="api-config" style="display:none;">
-        <h3>Hugging Face Token</h3>
-        <input id="api-input" type="password" placeholder="hf_..." autocomplete="off" />
-        <p class="hint">Stored locally in your browser. <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer">Get a token →</a></p>
-      </div>
-
-      <!-- Model Selection -->
       <div class="model-section">
         <p class="section-label">Model</p>
         <div class="model-list" id="model-list"></div>
       </div>
 
-      <!-- Prompt + Generate -->
       <div class="prompt-section">
         <label for="prompt">Prompt</label>
         <textarea id="prompt" placeholder="A misty mountain at dawn, oil painting, soft light..."></textarea>
@@ -482,7 +461,6 @@
         </button>
       </div>
 
-      <!-- Error -->
       <div id="error-box" class="error-box" style="display:none;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
@@ -492,9 +470,7 @@
         <span id="error-text"></span>
       </div>
 
-    </div><!-- /panel -->
-
-    <!-- OUTPUT -->
+    </div>
     <div class="output" id="output">
 
       <div id="placeholder" class="placeholder">
@@ -532,10 +508,8 @@
         </div>
       </div>
 
-    </div><!-- /output -->
-  </div><!-- /grid -->
-
-  <!-- HISTORY -->
+    </div>
+  </div>
   <section id="history-section" class="history-section" style="display:none;">
     <div class="history-header">
       <h2>History</h2>
@@ -545,89 +519,47 @@
   </section>
 
   <footer>
-    &copy; 2026 ImagineX · Powered by Hugging Face Inference API
+    &copy; 2026 ImagineX · Powered by Pollinations.AI
   </footer>
 
-</div><!-- /shell -->
+</div>
 
 <script>
-  // ─── ENV TOKEN ───────────────────────────────────────────────────────────────
-  // Pre-seeded from .env — users can override via Settings
-  const ENV_TOKEN = "";
-
-  // ─── MODELS ──────────────────────────────────────────────────────────────────
-  // Only models confirmed available on HF free serverless inference
   const MODELS = [
-    { id: "stabilityai/stable-diffusion-2-1",          name: "Stable Diffusion 2.1",  tag: "General"       },
-    { id: "stabilityai/stable-diffusion-xl-base-1.0",  name: "SDXL Base",             tag: "High Res"      },
-    { id: "prompthero/openjourney",                    name: "OpenJourney",            tag: "Artistic"      },
-    { id: "dreamlike-art/dreamlike-diffusion-1.0",     name: "Dreamlike",              tag: "Fantasy"       },
-    { id: "CompVis/stable-diffusion-v1-4",             name: "Stable Diffusion 1.4",  tag: "Classic"       },
+    { id: "flux",             name: "Flux",              tag: "Best Quality"  },
+    { id: "turbo",            name: "Turbo",             tag: "Fast"          },
+    { id: "sdxl",             name: "SDXL",              tag: "High Res"      },
   ];
 
-  // ─── STATE ───────────────────────────────────────────────────────────────────
-  let selectedModel   = MODELS[0].id;
+  let selectedModel = MODELS[0].id;
   let currentImageUrl = null;
-  let currentPrompt   = "";
-  let history         = [];
-  let apiKey          = "";
-  let settingsOpen    = false;
+  let currentPrompt = "";
+  let history = [];
 
-  // ─── ELEMENTS ────────────────────────────────────────────────────────────────
   const $ = id => document.getElementById(id);
-  const settingsBtn  = $("settings-btn");
-  const apiConfig    = $("api-config");
-  const apiInput     = $("api-input");
-  const modelList    = $("model-list");
-  const promptEl     = $("prompt");
-  const genBtn       = $("gen-btn");
-  const errorBox     = $("error-box");
-  const errorText    = $("error-text");
-  const placeholder  = $("placeholder");
-  const loader       = $("loader");
-  const result       = $("result");
-  const resultImg    = $("result-img");
-  const resultModel  = $("result-model");
-  const downloadBtn  = $("download-btn");
-  const newBtn       = $("new-btn");
+  const modelList = $("model-list");
+  const promptEl = $("prompt");
+  const genBtn = $("gen-btn");
+  const errorBox = $("error-box");
+  const errorText = $("error-text");
+  const placeholder = $("placeholder");
+  const loader = $("loader");
+  const result = $("result");
+  const resultImg = $("result-img");
+  const resultModel = $("result-model");
+  const downloadBtn = $("download-btn");
+  const newBtn = $("new-btn");
   const historySection = $("history-section");
-  const historyGrid  = $("history-grid");
-  const clearBtn     = $("clear-btn");
+  const historyGrid = $("history-grid");
+  const clearBtn = $("clear-btn");
 
-  // ─── INIT ────────────────────────────────────────────────────────────────────
   function init() {
-    apiKey  = localStorage.getItem("hf_token") || ENV_TOKEN;
     history = JSON.parse(localStorage.getItem("ix_history") || "[]");
-
-    if (apiKey) localStorage.setItem("hf_token", apiKey);
-
-    apiInput.value = apiKey;
-    settingsOpen   = !apiKey;
-    applySettings();
-
     buildModels();
     renderHistory();
     syncBtn();
   }
 
-  // ─── SETTINGS ────────────────────────────────────────────────────────────────
-  settingsBtn.addEventListener("click", () => {
-    settingsOpen = !settingsOpen;
-    applySettings();
-  });
-
-  function applySettings() {
-    apiConfig.style.display = settingsOpen ? "block" : "none";
-    settingsBtn.classList.toggle("active", settingsOpen);
-  }
-
-  apiInput.addEventListener("input", () => {
-    apiKey = apiInput.value.trim();
-    localStorage.setItem("hf_token", apiKey);
-    syncBtn();
-  });
-
-  // ─── MODELS ──────────────────────────────────────────────────────────────────
   function buildModels() {
     modelList.innerHTML = "";
     MODELS.forEach(m => {
@@ -643,15 +575,12 @@
     });
   }
 
-  // ─── PROMPT SYNC ─────────────────────────────────────────────────────────────
   promptEl.addEventListener("input", syncBtn);
   function syncBtn() {
-    genBtn.disabled = !(promptEl.value.trim() && apiKey);
+    genBtn.disabled = !promptEl.value.trim();
   }
 
-  // ─── GENERATE ────────────────────────────────────────────────────────────────
-  document.getElementById("gen-btn").closest("button") || genBtn;
-  promptEl.closest("form") || promptEl.addEventListener("keydown", e => {
+  promptEl.addEventListener("keydown", e => {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) generate();
   });
 
@@ -659,7 +588,10 @@
 
   async function generate() {
     currentPrompt = promptEl.value.trim();
-    if (!currentPrompt || !apiKey) return;
+    if (!currentPrompt) {
+      showError("Please enter a prompt first.");
+      return;
+    }
 
     setLoading(true);
     hideError();
@@ -667,82 +599,32 @@
     show(result, false);
 
     try {
-      const res = await fetch(
-        `https://api-inference.huggingface.co/models/${selectedModel}`,
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type":  "application/json",
-            "x-use-cache":   "false",
-          },
-          body: JSON.stringify({
-            inputs: currentPrompt,
-            parameters: { num_inference_steps: 30 },
-          }),
-        }
-      );
+      const encodedPrompt = encodeURIComponent(currentPrompt);
+      const seed = Math.floor(Math.random() * 1000000);
+      const width = 1024;
+      const height = 1024;
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=${selectedModel}&width=${width}&height=${height}&seed=${seed}&nologo=true`;
 
-      // surface detailed errors from the API
-      if (!res.ok) {
-        let detail = `HTTP ${res.status}`;
-        try {
-          const ct = res.headers.get("content-type") || "";
-          if (ct.includes("application/json")) {
-            const j = await res.json();
-            detail = j.error || j.message || detail;
-          } else {
-            const t = await res.text();
-            if (t) detail = t.substring(0, 200);
-          }
-        } catch {}
+      const res = await fetch(imageUrl);
+      if (!res.ok) throw new Error(`Image generation failed: HTTP ${res.status}`);
 
-        if (res.status === 401 || res.status === 403) {
-          throw new Error("Invalid or expired token. Open Settings and paste a valid Hugging Face token.");
-        }
-        if (res.status === 503) {
-          throw new Error("Model is loading — please wait 10–20 seconds and try again.");
-        }
-        if (res.status === 422) {
-          throw new Error(`Validation error: ${detail}`);
-        }
-        throw new Error(detail);
-      }
-
-      const contentType = res.headers.get("content-type") || "";
-
-      // Some models return JSON with base64 instead of a raw blob
-      let imageUrl;
-      if (contentType.includes("application/json")) {
-        const json = await res.json();
-        // Handle array of objects with generated_image or base64
-        const entry = Array.isArray(json) ? json[0] : json;
-        const b64   = entry?.generated_image || entry?.image || entry?.output;
-        if (!b64) throw new Error(`Unexpected JSON response: ${JSON.stringify(entry).substring(0, 200)}`);
-        imageUrl = `data:image/jpeg;base64,${b64}`;
-      } else {
-        const blob = await res.blob();
-        imageUrl   = URL.createObjectURL(blob);
-      }
-
-      currentImageUrl = imageUrl;
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      currentImageUrl = objectUrl;
 
       const modelName = MODELS.find(m => m.id === selectedModel)?.name || selectedModel;
-      resultImg.src           = imageUrl;
-      resultImg.alt           = currentPrompt;
+      resultImg.src = objectUrl;
+      resultImg.alt = currentPrompt;
       resultModel.textContent = `Generated with ${modelName}`;
       show(result, true);
 
-      // save history
-      history = [{ id: Date.now(), url: imageUrl, prompt: currentPrompt, model: modelName }, ...history].slice(0, 12);
+      history = [{ id: Date.now(), url: objectUrl, prompt: currentPrompt, model: modelName }, ...history].slice(0, 12);
       localStorage.setItem("ix_history", JSON.stringify(history));
       renderHistory();
-
     } catch (err) {
       let msg = err.message || "Unknown error occurred.";
-      // Distinguish a true network failure from an API error
-      if (msg === "Failed to fetch" || msg.toLowerCase().includes("networkerror") || msg.toLowerCase().includes("load failed")) {
-        msg = "Could not reach Hugging Face API. This can happen if:\n• The model requires a paid HF subscription\n• Your network is blocking the request\n• Try a different model";
+      if (msg === "Failed to fetch" || msg.toLowerCase().includes("networkerror")) {
+        msg = "Network error. Please check your internet connection and try again.";
       }
       showError(msg);
       show(placeholder, true);
@@ -751,23 +633,20 @@
     }
   }
 
-  // ─── DOWNLOAD ────────────────────────────────────────────────────────────────
   downloadBtn.addEventListener("click", () => {
     if (!currentImageUrl) return;
-    const a    = document.createElement("a");
-    a.href     = currentImageUrl;
+    const a = document.createElement("a");
+    a.href = currentImageUrl;
     a.download = `imaginex-${Date.now()}.jpg`;
     a.click();
   });
 
-  // ─── NEW ─────────────────────────────────────────────────────────────────────
   newBtn.addEventListener("click", () => {
     show(result, false);
     show(placeholder, true);
     currentImageUrl = null;
   });
 
-  // ─── CLEAR HISTORY ───────────────────────────────────────────────────────────
   clearBtn.addEventListener("click", () => {
     if (!confirm("Clear all history?")) return;
     history = [];
@@ -775,7 +654,6 @@
     renderHistory();
   });
 
-  // ─── RENDER HISTORY ──────────────────────────────────────────────────────────
   function renderHistory() {
     historySection.style.display = history.length ? "block" : "none";
     historyGrid.innerHTML = "";
@@ -789,11 +667,11 @@
           <p class="history-model-tag">${item.model}</p>
         </div>`;
       card.addEventListener("click", () => {
-        currentImageUrl         = item.url;
-        currentPrompt           = item.prompt;
-        promptEl.value          = item.prompt;
-        resultImg.src           = item.url;
-        resultImg.alt           = item.prompt;
+        currentImageUrl = item.url;
+        currentPrompt = item.prompt;
+        promptEl.value = item.prompt;
+        resultImg.src = item.url;
+        resultImg.alt = item.prompt;
         resultModel.textContent = `Generated with ${item.model}`;
         hideError();
         show(placeholder, false);
@@ -805,10 +683,9 @@
     });
   }
 
-  // ─── HELPERS ─────────────────────────────────────────────────────────────────
   function setLoading(on) {
     show(loader, on);
-    genBtn.disabled  = on;
+    genBtn.disabled = on;
     genBtn.innerHTML = on
       ? `<div class="spin-inline"></div> Generating…`
       : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Generate`;
@@ -820,15 +697,14 @@
   }
 
   function showError(msg) {
-    errorText.textContent    = msg;
-    errorBox.style.display   = "flex";
+    errorText.textContent = msg;
+    errorBox.style.display = "flex";
   }
 
   function hideError() {
     errorBox.style.display = "none";
   }
 
-  // ─── BOOT ────────────────────────────────────────────────────────────────────
   init();
 </script>
 </body>
